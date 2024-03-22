@@ -52,6 +52,7 @@ jobs:
             git push --force origin "failures/${{ env.CURRENT_DATE }}"
           else
             echo "Merging to master branch..."
-            git merge --no-ff ${{ env.BRANCH_NAME }}
+            git merge --no-ff --force ${{ env.BRANCH_NAME }}
+
             git push --force origin master
           fi
