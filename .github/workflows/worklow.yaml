@@ -41,10 +41,10 @@ jobs:
       - name: Fusion sur le master ou création d'une branche d'erreur
         run: |
           echo  "This is the branch name: " ${{ env.BRANCH_NAME }}
-          if [ "${{ env.BRANCH_NAME }}" == "dev" ]; then
+          if [ "${{ env.BRANCH_NAME }}" == "develop" ]; then
             git checkout -b master
           else
-            echo "Already on dev branch, no action needed."
+            echo "Already on develop branch, no action needed."
           fi
           if [ "${{ needs.build-and-test.result }}" != "success" ]; then
             echo "Tests failed, creating failure branch..."
