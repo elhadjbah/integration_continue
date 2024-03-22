@@ -1,0 +1,57 @@
+name: Gestion des pushs
+run-name: ${{ github.actor }} is testing out GitHub Actions 
+
+on: 
+    push:
+        branches: [dev]
+
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Configuration de l'environnement python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Exécution des tests
+        run: |
+          python -m unittest discover tests/
+
+  merge-or-create-failure-branch:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Récupéraion du nom de la branche
+        id: get_branch_name
+        run: |
+          echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      - name: Récupération du commit précédent
+        id: get_prev_commit
+        run: |
+          echo "PREV_COMMIT=$(git rev-parse ${GITHUB_SHA}1)" >> $GITHUB_ENV
+      - name: Récupération de la date actuelle
+        id: get_current_date
+        run: |
+          echo "CURRENT_DATE=$(date +'%Y-%m-%d-%H-%M-%S')" >> $GITHUB_ENV
+      - name: Fusion sur le master ou création d'une branche d'erreur
+        run: |
+          echo  "This is the branch name: " ${{ env.BRANCH_NAME }}
+          if [ "${{ env.BRANCH_NAME }}" == "dev" ]; then
+            git checkout -b master
+          else
+            echo "Already on dev branch, no action needed."
+          fi
+          if [ "${{ needs.build-and-test.result }}" != "success" ]; then
+            echo "Tests failed, creating failure branch..."
+            git checkout -b "failures/${{ env.CURRENT_DATE }}" ${{ env.PREV_COMMIT }}
+            git push --force origin "failures/${{ env.CURRENT_DATE }}"
+          else
+            echo "Merging to master branch..."
+            git merge --no-ff ${{ env.BRANCH_NAME }}
+            git push --force origin master
+          fi
