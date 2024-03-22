@@ -1,5 +1,7 @@
-./test/__pycache__
-.pytest_cache
-./.pytest_cache
-./.vscode
-
+# Ignore all files except Python source files
+*
+!.gitignore
+!src/
+!src/*.py
+!tests/
+!tests/*.py
