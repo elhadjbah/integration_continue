@@ -18,7 +18,7 @@ jobs:
           python-version: 3.x
       - name: Exécution des tests
         run: |
-          python -m unittest discover ../tests/
+          python -m unittest discover ../../tests/
 
   merge-or-create-failure-branch:
     needs: build-and-test
