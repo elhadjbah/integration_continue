@@ -5,3 +5,4 @@
 !src/*.py
 !tests/
 !tests/*.py
+!.github/workflows/workflows.yaml
