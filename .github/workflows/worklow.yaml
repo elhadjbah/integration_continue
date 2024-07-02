@@ -1,0 +1,67 @@
+name: Gestion des pushs
+run-name: ${{ github.actor }} is testing out GitHub Actions
+
+permissions: write-all
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configuration de l'environnement python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Exécution des tests
+        run: |
+          python -m unittest discover test/
+
+  merge-or-create-failure-branch:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Récupération de la date actuelle
+        id: get_current_date
+        run: |
+          echo "CURRENT_DATE=$(date +'%Y-%m-%d-%H-%M-%S')" >> $GITHUB_ENV
+
+      - name: Merge or create feature branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ needs.build-and-test.result }}" == "success" ]; then
+            echo "Tests passed, merging to master..."
+            git fetch origin
+            git checkout master
+            git pull origin master
+            git fetch origin develop:develop  # Récupération explicite de la branche develop
+            git merge develop
+            git push origin master
+          else
+            echo "Tests failed, creating failure branch..."
+            git fetch origin develop:develop  # Récupération explicite de la branche develop
+            git checkout develop
+            git checkout -b "failures/${{ env.CURRENT_DATE }}"
+            git push origin "failures/${{ env.CURRENT_DATE }}"
+            echo "Reverting develop to last successful commit..."
+            git reset --hard HEAD~1
+            git push --force origin develop
+          fi
