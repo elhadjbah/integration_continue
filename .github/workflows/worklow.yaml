@@ -60,6 +60,6 @@ jobs:
             git checkout -b "failures/${{ env.CURRENT_DATE }}"
             git push origin "failures/${{ env.CURRENT_DATE }}"
             echo "Reverting develop to last successful commit..."
-            git checkout develop
             git reset --hard HEAD~1
             git push --force origin develop
+          fi
