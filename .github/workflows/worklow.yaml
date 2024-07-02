@@ -19,7 +19,7 @@ jobs:
 
       - name: Exécution des tests
         run: |
-          python -m unittest discover tests/
+          python -m unittest discover test/
 
   merge-or-create-failure-branch:
     needs: build-and-test
