@@ -50,10 +50,12 @@ jobs:
             git fetch origin
             git checkout master
             git pull origin master
+            git fetch origin develop:develop  # Récupération explicite de la branche develop
             git merge develop
             git push origin master
           else
             echo "Tests failed, creating failure branch..."
+            git fetch origin develop:develop  # Récupération explicite de la branche develop
             git checkout develop
             git checkout -b "failures/${{ env.CURRENT_DATE }}"
             git push origin "failures/${{ env.CURRENT_DATE }}"
@@ -61,4 +63,3 @@ jobs:
             git checkout develop
             git reset --hard HEAD~1
             git push --force origin develop
-          fi
